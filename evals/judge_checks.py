@@ -42,10 +42,13 @@ _usable = judge_check(
     "operator_note_usable",
     "The note tells an operator, in plain words, what the shipper asked for (or what the email is, if it is not an "
     "order), why it was not entered automatically, and exactly what to check or do next. It agrees with the codes "
-    "shown and invents no facts. A note that only repeats a code, or that an operator could not act on, fails.",
+    "shown and invents no facts (the shipper's account name, worked out from the sender's domain, counts as known). "
+    "A note that only repeats a code, or that an operator could not act on, fails.",
     judge=judge,
     render_case=lambda case: (
-        f"Email {case.id}: {case.title}\nSubject: {case.input['email']['subject']}\n\n{case.input['email']['body']}"
+        f"Email {case.id}: {case.title}\nFrom: {case.input['email']['from']}\nSubject: {case.input['email']['subject']}\n\n"
+        f"{case.input['email']['body']}"
+        + "".join(f"\n\nAttachment {a['name']}:\n{a.get('text', '')}" for a in case.input["email"].get("attachments", []))
     ),
     render_output=_held,
 )

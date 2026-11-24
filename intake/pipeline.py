@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from intake.rollout import action
-from intake.rules import check
+from intake.rules import check, email_text
 from intake.world import ACCOUNTS, FACILITIES, account_for, directory_for_prompt
 
 Extractor = Callable[[dict], dict]
@@ -68,6 +68,31 @@ def tms_payload(account: str, order: dict) -> dict:
     }
 
 
+REASON_WORDS = {
+    "unknown_sender": "the sender's domain is not a known shipper account",
+    "not_an_order": "the email is not a request to move a load",
+    "change_request": "the email changes an order that already exists",
+    "cancel_request": "the email cancels an order that already exists",
+    "duplicate": "an open order already has this reference",
+    "hazmat": "the load may be hazardous material",
+    "ref_not_in_email": "the reference number read is not written in the email",
+    "weight_not_in_email": "the weight read is not written in the email",
+    "account_rule": "a rule for this shipper is not met",
+    "date_check": "the dates are missing, malformed, or run backwards",
+    "missing_field": "a required field is missing from the email",
+    "unknown_facility": (
+        "the facility could not be matched to exactly one entry in the facility directory (it matches none, or more than one)"
+    ),
+    "uncertain": "the reader was not sure of this field",
+}
+
+
+def explain(code: str) -> str:
+    head, _, detail = code.partition(":")
+    words = REASON_WORDS.get(head, head)
+    return f"{words} ({detail})" if detail else words
+
+
 def run(case_input: dict, extractor: Extractor, stage: str = "auto") -> dict:
     """One email through the agent. stage is the account's rollout stage (see rollout.py); the
     test set runs every account at auto, the strictest test of what would post on its own."""
@@ -99,11 +124,13 @@ def run(case_input: dict, extractor: Extractor, stage: str = "auto") -> dict:
     if route == "operator":
         facts = {
             "from": email["from"],
-            "subject": email.get("subject", ""),
+            "email_text": email_text(email),
             "request_type": read["request_type"],
-            "order_as_read": order,
-            "held_because": reasons,
+            "held_because": [explain(r) for r in reasons],
         }
+        if read["request_type"] == "new_order":
+            # what the reader filled in, including account defaults the email may not state
+            facts["order_as_read"] = order
         written = extractor({"task": "note", "facts": facts})
         calls.append(written.get("_meta", {}))
         out["note"] = written["note"]

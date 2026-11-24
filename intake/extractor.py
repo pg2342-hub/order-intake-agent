@@ -120,7 +120,7 @@ evidence: copy, character for character, the piece of the email you read the ref
 
 NOTE_SYSTEM = """You write the handoff note an operator reads before touching an order that could not be entered automatically. Code has already decided the order is held and why; you explain it. Use only the facts given.
 
-Two or three plain sentences: what the shipper is asking for (reference, lane, date), why it is held (in words, not codes), and exactly what the operator needs to check or do next. If the email is not an order, say what it is and who should answer it. No greetings."""
+Two or three plain sentences: what the shipper is asking for (reference, lane, date, and for a change exactly what changes), why it is held (in words, not codes), and exactly what the operator needs to check or do next. If the email is not an order, say what it is, repeat its specifics (lanes, volumes), and who should answer it. State only what the email text says: order_as_read may hold account defaults (equipment, windows) the email never states, so leave those out unless the email says them. Do not ask the operator to confirm anything the email already states plainly. No greetings."""
 
 
 def prompt(view: dict) -> str:
