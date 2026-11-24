@@ -1,0 +1,11 @@
+# Where each shipper account is in its rollout. Move an account up one stage at a time,
+# only when its emails in the test set clear the bar in intake/rollout.py (see the demo page).
+#   shadow:  the agent reads every email; operators still key every order; the two are compared
+#   approve: orders the guardrails pass wait for one click from an operator; the rest get a handoff note
+#   auto:    orders the guardrails pass post to the TMS on their own; the rest get a handoff note
+accounts:
+  NGP: shadow
+  HPF: shadow
+  RBS: shadow
+  CCH: shadow
+  LHG: shadow

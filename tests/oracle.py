@@ -24,9 +24,20 @@ EXCEPTIONS = {
 
 def blank():
     return {
-        "customer_ref": None, "pickup_facility": None, "pickup_date": None, "pickup_window": None,
-        "delivery_facility": None, "delivery_date": None, "delivery_appt_required": False, "equipment": "dry_van_53",
-        "temp_f": None, "weight_lb": None, "pallets": None, "commodity": None, "hazmat": False, "un_number": None,
+        "customer_ref": None,
+        "pickup_facility": None,
+        "pickup_date": None,
+        "pickup_window": None,
+        "delivery_facility": None,
+        "delivery_date": None,
+        "delivery_appt_required": False,
+        "equipment": "dry_van_53",
+        "temp_f": None,
+        "weight_lb": None,
+        "pallets": None,
+        "commodity": None,
+        "hazmat": False,
+        "un_number": None,
         "accessorials": [],
     }
 
@@ -37,8 +48,10 @@ def oracle(case, tweak=None):
     def extractor(view):
         if view.get("task") == "note":
             f = view["facts"]
-            return {"note": f"Held because {', '.join(f['held_because'])}; please check the email from {f['from']}.",
-                    "_meta": META}
+            return {
+                "note": f"Held because {', '.join(f['held_because'])}; please check the email from {f['from']}.",
+                "_meta": META,
+            }
         if case.expected["route"] == "post":
             order = {**dict(case.expected["order"]), "commodity": "goods"}
             uncertain, request_type = [], "new_order"
@@ -49,8 +62,13 @@ def oracle(case, tweak=None):
             order = {**blank(), **spec}
         if tweak:
             order = tweak(order)
-        return {"request_type": request_type, "order": order, "uncertain": uncertain,
-                "evidence": {"customer_ref": order.get("customer_ref"), "weight": None},
-                "applied_rules": [], "_meta": META}
+        return {
+            "request_type": request_type,
+            "order": order,
+            "uncertain": uncertain,
+            "evidence": {"customer_ref": order.get("customer_ref"), "weight": None},
+            "applied_rules": [],
+            "_meta": META,
+        }
 
     return extractor

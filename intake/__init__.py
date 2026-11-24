@@ -1,1 +1,1 @@
-"""Read a shipment-request email, apply the account's rules, and gate which orders post on their own."""
+"""Turn shipment-request emails into orders, apply each account's rules, and hand anything risky to an operator."""

@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "order-intake-gate"
+name = "order-intake-agent"
 version = "0.1.0"
-description = "Read shipment-request emails, apply each customer's rules, and gate which orders post without a person"
+description = "Turns messy shipment-request emails into orders, applies each customer's rules, and hands anything risky to an operator"
 requires-python = ">=3.10"
 dependencies = [
   "golive-gate[claude]==0.1.1",
@@ -14,6 +14,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+pdf = ["pypdf>=4"]
+
+[project.scripts]
+order-intake = "intake.cli:main"
 
 [tool.setuptools]
 packages = ["intake"]

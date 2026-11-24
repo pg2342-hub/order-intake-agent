@@ -85,3 +85,29 @@ def test_relative_date_in_the_past_is_held():
     case = CASES["f04"]
     out = pipeline.run(case.input, oracle(case, lambda o: {**o, "pickup_date": "2026-12-06"}))
     assert "date_check:order" in out["reasons"]
+
+
+def test_rollout_stage_decides_what_happens():
+    case = CASES["c01"]
+    assert pipeline.run(case.input, oracle(case), stage="shadow")["action"] == "logged"
+    assert pipeline.run(case.input, oracle(case), stage="approve")["action"] == "awaiting_approval"
+    assert pipeline.run(case.input, oracle(case), stage="auto")["action"] == "posted"
+    held = CASES["x01"]
+    for stage in ("approve", "auto"):
+        assert pipeline.run(held.input, oracle(held), stage=stage)["action"] == "to_operator"
+
+
+def test_eml_file_loads(tmp_path):
+    from intake.cli import load
+
+    raw = (
+        "From: Dana <orders@harborpointfoods.example>\nTo: orders@lanternfreight.example\n"
+        "Date: Mon, 07 Dec 2026 07:55:00 -0600\nSubject: PO 30417\nMIME-Version: 1.0\n"
+        'Content-Type: multipart/mixed; boundary="b"\n\n--b\nContent-Type: text/plain\n\nNeed a reefer.\n'
+        '--b\nContent-Type: text/csv\nContent-Disposition: attachment; filename="loads.csv"\n\nPO,Weight\n30417,36500\n--b--\n'
+    )
+    p = tmp_path / "x.eml"
+    p.write_text(raw)
+    mail = load(p)
+    assert mail["date"].startswith("2026-12-07") and mail["attachments"][0]["name"] == "loads.csv"
+    assert "Need a reefer" in mail["body"]

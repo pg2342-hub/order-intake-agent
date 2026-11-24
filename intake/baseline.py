@@ -2,8 +2,8 @@
 
 It pulls labelled values with patterns, maps a facility only when its name or a known alias appears
 word for word, fills each account's fixed defaults (equipment, NGP's delivery appointment), assumes
-every email is a new order, judges nothing (no hazmat, no relative dates, no threads), and posts everything. It does well on a clean,
-labelled tender and badly on everything else, which is the point: a decent pass rate on easy
+every email is a new order, judges nothing (no hazmat, no relative dates, no threads), and posts
+everything. It does well on a clean, labelled tender and badly on everything else, which is the point: a decent pass rate on easy
 emails is not a reason to let it post on its own.
 """
 
@@ -45,7 +45,14 @@ def parse(email: dict) -> dict:
             dates.append(datetime(int(iy or y or 2026), int(im or m), int(idd or d)).date().isoformat())
         except ValueError:
             continue
-    window = WINDOW.search(text)
+    window = next(
+        (
+            w
+            for w in WINDOW.finditer(text)
+            if int(w.group(1)) < 24 and int(w.group(3)) < 24 and int(w.group(2)) < 60 and int(w.group(4)) < 60
+        ),
+        None,
+    )
     temp = TEMP.search(text)
     stops = _facilities(text)
     order = {

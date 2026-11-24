@@ -44,8 +44,9 @@ _usable = judge_check(
     "order), why it was not entered automatically, and exactly what to check or do next. It agrees with the codes "
     "shown and invents no facts. A note that only repeats a code, or that an operator could not act on, fails.",
     judge=judge,
-    render_case=lambda case: f"Email {case.id}: {case.title}\nSubject: {case.input['email']['subject']}\n\n"
-    f"{case.input['email']['body']}",
+    render_case=lambda case: (
+        f"Email {case.id}: {case.title}\nSubject: {case.input['email']['subject']}\n\n{case.input['email']['body']}"
+    ),
     render_output=_held,
 )
 

@@ -1,15 +1,17 @@
 """One email in, one decision out: post the order to the TMS on its own, or hold it for an operator.
 
-    email -> account (code, from the sender's domain)
-          -> Claude reads the order (extractor.py)
-          -> guardrails (rules.py)
-          -> post, or hold with reasons and a handoff note (a second Claude call)
+email -> account (code, from the sender's domain)
+      -> Claude reads the order (extractor.py)
+      -> guardrails (rules.py)
+      -> post, or hold with reasons and a handoff note (a second Claude call)
+      -> the account's rollout stage decides what actually happens (rollout.py)
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
 
+from intake.rollout import action
 from intake.rules import check
 from intake.world import ACCOUNTS, FACILITIES, account_for, directory_for_prompt
 
@@ -20,7 +22,9 @@ def view(email: dict, account: str | None) -> dict:
     """What the model sees: the email, the account's rules and the facility directory."""
     return {
         "email": email,
-        "account": None if account is None else {"code": account, "name": ACCOUNTS[account]["name"], "rules": ACCOUNTS[account]["rules"]},
+        "account": None
+        if account is None
+        else {"code": account, "name": ACCOUNTS[account]["name"], "rules": ACCOUNTS[account]["rules"]},
         "facilities": directory_for_prompt(),
     }
 
@@ -40,10 +44,20 @@ def tms_payload(account: str, order: dict) -> dict:
         "shipper": ACCOUNTS[account]["name"],
         "reference": order["customer_ref"],
         "stops": [
-            {"type": "pickup", "facility": order["pickup_facility"], "name": FACILITIES[order["pickup_facility"]]["name"],
-             "date": order["pickup_date"], "window": order.get("pickup_window")},
-            {"type": "delivery", "facility": order["delivery_facility"], "name": FACILITIES[order["delivery_facility"]]["name"],
-             "date": order["delivery_date"], "appointment": bool(order.get("delivery_appt_required"))},
+            {
+                "type": "pickup",
+                "facility": order["pickup_facility"],
+                "name": FACILITIES[order["pickup_facility"]]["name"],
+                "date": order["pickup_date"],
+                "window": order.get("pickup_window"),
+            },
+            {
+                "type": "delivery",
+                "facility": order["delivery_facility"],
+                "name": FACILITIES[order["delivery_facility"]]["name"],
+                "date": order["delivery_date"],
+                "appointment": bool(order.get("delivery_appt_required")),
+            },
         ],
         "equipment": order["equipment"],
         "temp_f": order.get("temp_f"),
@@ -54,7 +68,9 @@ def tms_payload(account: str, order: dict) -> dict:
     }
 
 
-def run(case_input: dict, extractor: Extractor) -> dict:
+def run(case_input: dict, extractor: Extractor, stage: str = "auto") -> dict:
+    """One email through the agent. stage is the account's rollout stage (see rollout.py); the
+    test set runs every account at auto, the strictest test of what would post on its own."""
     email = case_input["email"]
     account = account_for(email["from"])
     calls = []
@@ -74,6 +90,8 @@ def run(case_input: dict, extractor: Extractor) -> dict:
         "evidence": read.get("evidence", {}),
         "applied_rules": read.get("applied_rules", []),
         "route": route,
+        "stage": stage,
+        "action": action(route, stage),
         "reasons": reasons,
         "tms": tms_payload(account, order) if route == "post" else None,
         "note": "",

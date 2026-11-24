@@ -1,0 +1,59 @@
+<main>
+
+<div class="head">
+<h1>Order Intake Agent</h1>
+<p class="lead">Shippers email load requests as PDFs, spreadsheets, forwarded threads and one-line notes. This agent reads each one, applies that shipper's own rules, and either fills in the order for the trucking company's system or hands it to an operator with a note saying why. Pick an email to see what it does.</p>
+</div>
+
+<section class="desk" id="tool" aria-label="Order desk">
+  <div class="inbox">
+    <div class="ihead"><b>Order desk inbox</b><span id="icount"></span></div>
+    <div class="seg small" role="radiogroup" aria-label="Show emails" id="ifilter">
+      <button type="button" role="radio" aria-checked="true" data-g="all">All</button>
+      <button type="button" role="radio" aria-checked="false" data-g="clean">Clean</button>
+      <button type="button" role="radio" aria-checked="false" data-g="formats">Messy</button>
+      <button type="button" role="radio" aria-checked="false" data-g="rules">Account rules</button>
+      <button type="button" role="radio" aria-checked="false" data-g="exceptions">Exceptions</button>
+    </div>
+    <ul class="mlist" id="mlist" role="listbox" aria-label="Emails"></ul>
+  </div>
+  <article class="mail" id="mail" aria-label="Selected email"></article>
+  <article class="doc" id="doc" aria-live="polite"></article>
+</section>
+
+<section class="verdict" id="compare" aria-labelledby="verdict-h">
+  <div class="vhead"><h2 id="verdict-h">Same 30 emails, two ways to read them</h2><p>Bar to post on its own: <b>no wrong order and no exception posted, on all 3 runs</b></p></div>
+  <div id="vrows"></div>
+  <div class="legend"><span><i class="pass"></i>Right</span><span><i class="fail"></i>Missed (held when it could have posted, or a wrong reason)</span><span><i class="crit"></i>Wrong order posted, or an exception posted</span><span>Each square is one email. Select one to open it above.</span></div>
+</section>
+
+<div class="layout">
+<div class="content">
+  <h2 id="rollout">Rollout, one shipper at a time</h2>
+  <p class="point">No shipper goes straight to orders posting on their own. Each account starts in <b>shadow</b> (the agent reads every email, operators still key every order, the two are compared), moves to <b>approve</b> (good orders wait for one click), and reaches <b>auto</b> only when its emails clear the bar. Below is the stage each account's test emails support today.</p>
+  <figure class="ladder" id="ladder" aria-label="Stage each account supports"></figure>
+  <p class="note" id="laddernote"></p>
+
+  <h2 id="how">How it decides</h2>
+  <div class="steps">
+    <div class="step"><h3><span>1</span>Account</h3><p>Code files the email under the shipper by the sender's domain. The model never picks the customer.</p></div>
+    <div class="step"><h3><span>2</span>Read</h3><p>Claude reads the email and attachments with that shipper's rules and the facility directory, and returns the order, what kind of request it is, and which fields it is unsure of.</p></div>
+    <div class="step"><h3><span>3</span>Check</h3><p>Code holds the order if the reference or weight is not written in the email, a facility is unknown, dates run backwards, the shipper's rule is broken, or it is hazmat, a duplicate, a change or a cancellation.</p></div>
+    <div class="step"><h3><span>4</span>Hand off</h3><p>A held order goes to an operator with a short note, written after code has decided, saying what was asked and what to check.</p></div>
+  </div>
+
+  <h2 id="rules">The shippers' rules</h2>
+  <p class="point">Each account's rules, as an operator would explain them in discovery. The agent gets them with every email; code re-checks the ones a rule can state exactly.</p>
+  <div class="accts" id="accts"></div>
+</div>
+
+<aside class="side" aria-label="About this build">
+  <nav aria-label="On this page"><a href="#tool">Try it</a><a href="#compare">Agent vs template parser</a><a href="#rollout">Rollout by shipper</a><a href="#how">How it decides</a><a href="#rules">Shippers' rules</a></nav>
+  <div><h3>Data</h3><p id="datanote"></p></div>
+  <div><h3>Run it yourself</h3><p>Python 3.10+. Replay any test email with no key, or read your own saved email with a live Claude call.</p><pre>pip install -e .
+order-intake case f03
+order-intake read my_email.eml</pre></div>
+  <div><a class="pill" href="https://github.com/pg2342-hub/order-intake-agent">Code on GitHub</a></div>
+</aside>
+</div>
+</main>
