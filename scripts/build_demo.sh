@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 golive run evals/golive.yml --out reports/recorded >/dev/null || true
 golive run evals/golive.baseline.yml --out reports/baseline >/dev/null || true
+mkdir -p docs
 python scripts/build_page.py
 python - <<'PY'
 from pathlib import Path

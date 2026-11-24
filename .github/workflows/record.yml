@@ -40,13 +40,28 @@ jobs:
           if errors:
               print("incomplete recording, not committing:", errors[:5]); sys.exit(1)
           PY
-      - name: Rebuild the demo page from the recording
-        # replay only: with GOLIVE_LIVE unset the judge replays the recording instead of grading again
-        run: env -u GOLIVE_LIVE bash scripts/build_demo.sh
       - name: Commit the recording
+        # committed before the page build, so a page-build error never loses a paid live run
         run: |
+          cp reports/live/results.json recordings/live_results.json
+          python - <<'PY'
+          import json
+          r = json.load(open("reports/live/results.json"))
+          for c in r["cases"]:
+              for i, run in enumerate(c["runs"], 1):
+                  bad = {k: v["reason"] for k, v in run["verdicts"].items() if v["result"] == "fail"}
+                  if bad:
+                      print(c["id"], "run", i, json.dumps(bad)[:400])
+          PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add recordings docs
+          git add recordings
           git commit -m "Record live run" || echo "nothing to commit"
+          git push
+      - name: Rebuild the demo page from the recording
+        # replay only: with GOLIVE_LIVE unset the judge replays the recording instead of grading again
+        run: |
+          env -u GOLIVE_LIVE bash scripts/build_demo.sh
+          git add docs
+          git commit -m "Rebuild the demo page from the live run" || echo "nothing to commit"
           git push
