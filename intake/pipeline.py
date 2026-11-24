@@ -124,6 +124,7 @@ def run(case_input: dict, extractor: Extractor, stage: str = "auto") -> dict:
     if route == "operator":
         facts = {
             "from": email["from"],
+            "shipper": ACCOUNTS[account]["name"] if account else "unknown sender",
             "email_text": email_text(email),
             "request_type": read["request_type"],
             "held_because": [explain(r) for r in reasons],
