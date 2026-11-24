@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "order-intake-gate"
+version = "0.1.0"
+description = "Read shipment-request emails, apply each customer's rules, and gate which orders post without a person"
+requires-python = ">=3.10"
+dependencies = [
+  "golive-gate[claude]==0.1.1",
+  "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools]
+packages = ["intake"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"intake/extractor.py" = ["E501"]
+"intake/world.py" = ["E501"]
+"scripts/make_cases.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["intake"]
+known-third-party = ["golive_gate"]

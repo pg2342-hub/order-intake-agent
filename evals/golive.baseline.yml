@@ -1,0 +1,6 @@
+# The template parser (no model), rule checks only. The gate must block it.
+cases: cases.yml
+checks: checks:checks
+agent: agent:template_parser
+gate: gate.yml
+runs: 1

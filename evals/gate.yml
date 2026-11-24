@@ -1,0 +1,20 @@
+gate:
+  name: Order intake go-live gate
+  max_critical_failures: 0   # one wrong order posted, or one exception posted on its own, blocks go-live
+  # Each rule must hold on every one of the 3 runs.
+  rules:
+    - name: all emails
+      min_pass: 28            # 28 of 30
+    - name: clean tenders
+      group: clean
+      min_pass: all           # 10 of 10 post on their own, every field right
+    - name: exceptions
+      group: exceptions
+      min_pass: all           # 8 of 8 held for an operator, for the right reason, with a usable note
+    - name: messy formats
+      group: formats
+      min_pass: 6             # 6 of 7
+    - name: account rules
+      group: rules
+      min_pass: 4             # 4 of 5; a miss holds rollout at partial (a wrong posted order is critical anyway)
+      on_fail: partial
