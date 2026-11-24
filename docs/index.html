@@ -1,0 +1,413 @@
+<!doctype html><html lang="en"><head>
+<!-- demo-chrome --><meta name="theme-color" content="#f4f2ec"><link rel="icon" href="https://pranavgudise.dev/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="https://pranavgudise.dev/kit/demo.css"><!-- /demo-chrome -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Intake Agent</title>
+<meta name="description" content="Order Intake Agent: Claude reads shipment-request emails, applies each shipper's rules, and posts the order or hands it to an operator; recorded live run on 30 test emails against a template parser.">
+<style>
+
+/* Shared demo layout, copied from the approved pilots. Keep it; add page-specific rules below it. */
+
+.head{padding:8px 0 0}
+.head h1{margin:40px 0 14px}
+.head .lead{max-width:38em}
+/* verdict: the same 25 cases under the same gate, one square per case */
+.verdict{margin:36px 0 0;border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;overflow:hidden}
+.vhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;padding:18px 24px;border-bottom:1px solid var(--rule)}
+.vhead h2{all:unset;font:400 22px/1.2 var(--serif)}
+.vhead p{margin:0;color:var(--ink-2);font-size:15px}
+.vhead p b{color:var(--ink)}
+.vrow,.arow{display:grid;grid-template-columns:minmax(0,15em) minmax(0,1fr) 7.5em 5.5em;align-items:center;gap:20px;padding:22px 24px}
+.vrow+.vrow{border-top:1px solid var(--rule-soft)}
+.vwho b,.awho b{display:block;font:400 20px/1.2 var(--serif)}
+.vwho span,.awho span{display:block;color:var(--ink-2);font-size:14px;line-height:1.4;margin-top:4px}
+.strip{display:grid;grid-template-columns:repeat(25,minmax(0,1fr));gap:4px}
+.cell{display:block;aspect-ratio:1;border-radius:4px;border:1.5px solid transparent;transition:transform .2s var(--ease),box-shadow .2s}
+.cell.pass{background:var(--green)}
+.cell.fail{background:var(--paper);border-color:var(--ink)}
+.cell.crit{background:var(--ink)}
+.cell:hover,.cell:focus-visible,.cell.lit{transform:translateY(-3px);box-shadow:0 6px 12px -6px rgb(27 26 23/.5)}
+.vscore b{font:400 44px/1 var(--serif)}
+.vscore span{display:block;color:var(--ink-2);font-size:13px;line-height:1.35;margin-top:4px}
+.gate{justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 14px;border-radius:999px;font:500 13px/1 var(--mono);letter-spacing:.06em}
+.gate.go{background:var(--green-wash);color:var(--green)}
+.gate.nogo{background:var(--ink);color:var(--paper)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;padding:14px 24px;border-top:1px solid var(--rule);color:var(--ink-2);font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1.5px solid transparent}
+.legend .pass{background:var(--green)}.legend .fail{border-color:var(--ink)}.legend .crit{background:var(--ink)}
+/* page body: content and a side column */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:56px;align-items:start;margin-top:8px}
+.side{position:sticky;top:24px;margin-top:64px;display:grid;gap:22px;font-size:14px;color:var(--ink-2)}
+.side h3{margin:0 0 6px;font:500 13px/1.3 var(--sans);color:var(--ink)}
+.side p{margin:0}
+.side nav a{display:block;padding:5px 0;color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule-soft)}
+.side nav a:hover{color:var(--ink)}
+.side pre{font-size:12px;margin:6px 0 0}
+.point{font-size:17px;max-width:40em;margin:0}
+.point b{font-weight:500}
+.seg{display:flex;width:fit-content;max-width:100%;flex-wrap:wrap;gap:2px;padding:3px;border:1px solid var(--rule);border-radius:999px;margin:0 0 16px;background:#fbfaf6}
+.seg button{min-height:34px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:500 14px/1 var(--sans);cursor:pointer}
+.seg button span{font-weight:400;opacity:.8}
+.seg button[aria-checked=true]{background:var(--ink);color:var(--paper)}
+.n{font-family:var(--mono);font-size:13px}
+.tag{font:400 12px/1 var(--mono);border:1px solid var(--rule);border-radius:999px;padding:4px 8px;white-space:nowrap}
+.tx{max-width:340px}.ch{font-size:13px;color:var(--ink-2);margin-top:4px}
+.v{white-space:nowrap;font-weight:500}
+.v.ok{color:var(--green)}
+.v.bad{white-space:normal;color:var(--ink)}
+.v.bad.crit::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--ink);margin-right:6px;vertical-align:1px}
+.why{font-weight:400;font-size:13px;color:var(--ink-2);margin-top:4px;max-width:240px}
+#cases tr.lit td{background:var(--green-wash)}
+#cases tr{scroll-margin-top:24px}
+.abl{border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;overflow:hidden}
+.arow{grid-template-columns:minmax(0,13em) minmax(0,1fr) 6.5em}
+.arow+.arow{border-top:1px solid var(--rule-soft)}
+.ascore{font:400 15px/1 var(--sans);color:var(--ink-2)}
+.ascore b{font:400 30px/1 var(--serif);color:var(--ink)}
+.ascore span{display:block;font-size:13px;margin-top:4px}
+.note{color:var(--ink-2);font-size:15px;max-width:44em;margin-top:14px}
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rule div{border:1px solid var(--rule);border-radius:16px;padding:20px 22px;background:#fbfaf6}
+.rule div:last-child{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rule h3{margin:0 0 6px;font:400 22px/1.2 var(--serif)}
+.rule p{margin:0 0 10px;font-size:15px;opacity:.85}
+.rule ul{margin:0;font-size:15px}
+.rule div:last-child li::marker{color:rgb(244 242 236/.6)}
+.sev{font:500 12px/1 var(--mono);padding:4px 8px;border-radius:999px;border:1px solid var(--rule)}
+.sev-critical{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sev-low{color:var(--ink-2)}
+@media (max-width:1000px){
+ .layout{grid-template-columns:minmax(0,1fr);gap:0}
+ .side{position:static;margin-top:48px;order:2}
+ .vrow{grid-template-columns:minmax(0,1fr) auto;gap:14px 16px}
+ .vrow .strip{grid-column:1/-1;grid-row:2}
+ .vscore{grid-row:3}.vrow .gate{grid-row:3}
+ .arow{grid-template-columns:minmax(0,1fr) auto;gap:12px 16px}
+ .arow .strip{grid-column:1/-1;grid-row:2}
+ .ascore{grid-column:2;grid-row:1}
+ .rule{grid-template-columns:1fr}
+}
+@media (max-width:640px){.vrow,.arow{padding:18px}.vhead{padding:16px 18px}.strip{gap:3px}.tx{max-width:none}}
+@media (prefers-reduced-motion:reduce){.cell{transition:none}}
+
+/* ---- page-specific rules ---- */
+.desk{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start;margin-top:28px;scroll-margin-top:16px}
+.inbox,.mail{border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;min-width:0}
+.inbox{padding:14px 12px 10px}
+.ihead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 4px 10px}
+.ihead b{font:500 15px/1.3 var(--sans)}
+.ihead span{font:12px/1 var(--mono);color:var(--ink-2)}
+.seg.small{margin:0 0 10px}
+.seg.small button{min-height:28px;padding:0 9px;font-size:12.5px}
+.mlist{list-style:none;margin:0;padding:0;max-height:560px;overflow:auto;display:grid;gap:2px}
+.mlist button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;width:100%;padding:8px;border-radius:10px;cursor:pointer}
+.mlist button:hover{background:var(--rule-soft)}
+.mlist button:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.mlist button[aria-selected=true]{background:var(--ink);color:var(--paper)}
+.mlist button[aria-selected=true] small{color:rgb(244 242 236/.72)}
+.mlist .who{font:500 13px/1.3 var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mlist small{grid-column:1/-1;font-size:12.5px;line-height:1.35;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:3px;margin-top:4px;border:1.5px solid transparent}
+.dot.pass{background:var(--green)}.dot.fail{border-color:currentColor}.dot.crit{background:currentColor}
+.mail{padding:18px 20px}
+.mail .mh{font:12.5px/1.6 var(--mono);color:var(--ink-2);border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:12px;overflow-wrap:anywhere}
+.mail .mh b{color:var(--ink);font-weight:500}
+.mail h2{all:unset;display:block;font:400 21px/1.25 var(--serif);margin:0 0 10px}
+.mail pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.55 var(--sans);margin:0;background:none;padding:0;border:0}
+.att{margin-top:14px;border:1px dashed var(--rule);border-radius:12px;padding:10px 12px;background:#fff}
+.att b{display:block;font:500 12px/1.3 var(--mono);margin-bottom:6px}
+.att pre{font:12.5px/1.5 var(--mono)}
+.doc{border:1px solid var(--rule);border-radius:16px;background:#fff;box-shadow:0 1px 0 rgb(27 26 23/.04),0 24px 48px -32px rgb(27 26 23/.35);min-width:0;overflow:hidden}
+.dhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 16px;padding:16px 20px;border-bottom:1px solid var(--rule)}
+.status{display:inline-flex;align-items:center;min-height:30px;padding:0 13px;border-radius:999px;font:500 12px/1 var(--mono);letter-spacing:.04em;border:1px solid var(--ink);white-space:nowrap}
+.st-posted{background:var(--green-wash);border-color:var(--green-wash);color:var(--green)}
+.st-awaiting_approval{border-style:dashed}
+.st-to_operator{background:var(--ink);color:var(--paper)}
+.st-logged{border-width:1.5px;border-style:dotted}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--rule);background:#fbfaf6}
+.ctl .seg{margin:0}
+.ctl label{font-size:12.5px;color:var(--ink-2)}
+.dbody{padding:16px 20px 20px}
+.tender{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;margin:0;font-size:14px}
+.tender dt{color:var(--ink-2);font-size:13px}
+.tender dd{margin:0;overflow-wrap:anywhere}
+.tender dd.bad{background:var(--rule-soft);border-radius:6px;padding:0 6px;margin-left:-6px}
+.tender dd.bad small{display:block;font:12px/1.4 var(--mono);color:var(--ink-2)}
+.tender dd.na{color:var(--ink-2)}
+.why{margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#fbfaf6;border:1px solid var(--rule-soft);font-size:14px}
+.why h3{all:unset;display:block;font:500 13px/1.3 var(--sans);margin-bottom:6px}
+.why ul{margin:0;padding-left:18px}
+.why p{margin:6px 0 0}
+.grade{margin-top:14px;font-size:13.5px;color:var(--ink-2)}
+.grade b{color:var(--ink);font-weight:500}
+.dmeta{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:12px;font:12px/1.4 var(--mono);color:var(--ink-2)}
+.verdict{margin-top:40px}
+.strip{grid-template-columns:repeat(30,minmax(0,1fr))}
+.vscore b{font-size:40px}
+.gate.partial{border:1.5px dashed var(--ink);color:var(--ink)}
+.ladder{margin:20px 0 0}
+.ladder svg{display:block;width:100%;height:auto;font-family:var(--sans)}
+.ladder .lab{font-size:14px;fill:var(--ink)}
+.ladder .sub{font-size:12px;fill:var(--ink-2)}
+.ladder .col{font:500 12px var(--mono);fill:var(--ink-2)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:12px}
+.step{border:1px solid var(--rule);border-radius:16px;padding:16px 18px;background:#fbfaf6}
+.step h3{margin:0 0 6px;font:400 19px/1.2 var(--serif);display:flex;gap:8px;align-items:baseline}
+.step h3 span{font:500 12px/1 var(--mono);color:var(--ink-2)}
+.step p{margin:0;font-size:14px;color:var(--ink-2)}
+.accts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.acct{border:1px solid var(--rule);border-radius:16px;padding:16px 18px}
+.acct h3{margin:0 0 6px;font:400 19px/1.2 var(--serif)}
+.acct ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+@media (max-width:1100px){.desk{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}.inbox{grid-column:1/-1}.mlist{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));max-height:300px}}
+@media (max-width:760px){.desk{grid-template-columns:minmax(0,1fr)}.steps,.accts{grid-template-columns:minmax(0,1fr)}.strip{grid-template-columns:repeat(15,minmax(0,1fr))}}
+</style></head><body>
+<!-- demo-chrome --><header class="demo-top"><a class="demo-brand" href="https://pranavgudise.dev/"><svg class="demo-mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><g class="n"><path class="f" d="M15.5 8.5 L 13.4 13.4 L 8.5 15.5 L 10.6 10.6 Z"/></g><circle class="p" cx="12" cy="12" r=".7"/></svg><span>Pranav Gudise</span></a><a class="pill" href="https://github.com/pg2342-hub/order-intake-agent">Code on GitHub</a></header><!-- /demo-chrome -->
+
+<main>
+
+<div class="head">
+<h1>Order Intake Agent</h1>
+<p class="lead">Shippers email load requests as PDFs, spreadsheets, forwarded threads and one-line notes. This agent reads each one, applies that shipper's own rules, and either fills in the order for the trucking company's system or hands it to an operator with a note saying why. Pick an email to see what it does.</p>
+</div>
+
+<section class="desk" id="tool" aria-label="Order desk">
+  <div class="inbox">
+    <div class="ihead"><b>Order desk inbox</b><span id="icount"></span></div>
+    <div class="seg small" role="radiogroup" aria-label="Show emails" id="ifilter">
+      <button type="button" role="radio" aria-checked="true" data-g="all">All</button>
+      <button type="button" role="radio" aria-checked="false" data-g="clean">Clean</button>
+      <button type="button" role="radio" aria-checked="false" data-g="formats">Messy</button>
+      <button type="button" role="radio" aria-checked="false" data-g="rules">Account rules</button>
+      <button type="button" role="radio" aria-checked="false" data-g="exceptions">Exceptions</button>
+    </div>
+    <ul class="mlist" id="mlist" role="listbox" aria-label="Emails"></ul>
+  </div>
+  <article class="mail" id="mail" aria-label="Selected email"></article>
+  <article class="doc" id="doc" aria-live="polite"></article>
+</section>
+
+<section class="verdict" id="compare" aria-labelledby="verdict-h">
+  <div class="vhead"><h2 id="verdict-h">Same 30 emails, two ways to read them</h2><p>Bar to post on its own: <b>no wrong order and no exception posted, on all 3 runs</b></p></div>
+  <div id="vrows"></div>
+  <div class="legend"><span><i class="pass"></i>Right</span><span><i class="fail"></i>Missed (held when it could have posted, or a wrong reason)</span><span><i class="crit"></i>Wrong order posted, or an exception posted</span><span>Each square is one email. Select one to open it above.</span></div>
+</section>
+
+<div class="layout">
+<div class="content">
+  <h2 id="rollout">Rollout, one shipper at a time</h2>
+  <p class="point">No shipper goes straight to orders posting on their own. Each account starts in <b>shadow</b> (the agent reads every email, operators still key every order, the two are compared), moves to <b>approve</b> (good orders wait for one click), and reaches <b>auto</b> only when its emails clear the bar. Below is the stage each account's test emails support today.</p>
+  <figure class="ladder" id="ladder" aria-label="Stage each account supports"></figure>
+  <p class="note" id="laddernote"></p>
+
+  <h2 id="how">How it decides</h2>
+  <div class="steps">
+    <div class="step"><h3><span>1</span>Account</h3><p>Code files the email under the shipper by the sender's domain. The model never picks the customer.</p></div>
+    <div class="step"><h3><span>2</span>Read</h3><p>Claude reads the email and attachments with that shipper's rules and the facility directory, and returns the order, what kind of request it is, and which fields it is unsure of.</p></div>
+    <div class="step"><h3><span>3</span>Check</h3><p>Code holds the order if the reference or weight is not written in the email, a facility is unknown, dates run backwards, the shipper's rule is broken, or it is hazmat, a duplicate, a change or a cancellation.</p></div>
+    <div class="step"><h3><span>4</span>Hand off</h3><p>A held order goes to an operator with a short note, written after code has decided, saying what was asked and what to check.</p></div>
+  </div>
+
+  <h2 id="rules">The shippers' rules</h2>
+  <p class="point">Each account's rules, as an operator would explain them in discovery. The agent gets them with every email; code re-checks the ones a rule can state exactly.</p>
+  <div class="accts" id="accts"></div>
+</div>
+
+<aside class="side" aria-label="About this build">
+  <nav aria-label="On this page"><a href="#tool">Try it</a><a href="#compare">Agent vs template parser</a><a href="#rollout">Rollout by shipper</a><a href="#how">How it decides</a><a href="#rules">Shippers' rules</a></nav>
+  <div><h3>Data</h3><p id="datanote"></p></div>
+  <div><h3>Run it yourself</h3><p>Python 3.10+. Replay any test email with no key, or read your own saved email with a live Claude call.</p><pre>pip install -e .
+order-intake case f03
+order-intake read my_email.eml</pre></div>
+  <div><a class="pill" href="https://github.com/pg2342-hub/order-intake-agent">Code on GitHub</a></div>
+</aside>
+</div>
+</main>
+<script src="data.js"></script>
+<script>
+(() => {
+  const D = window.DATA;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const STAGES = ["shadow", "approve", "auto"];
+  const STAGE_TXT = { shadow: "Shadow", approve: "Approve", auto: "Auto" };
+  const ACTION_TXT = { posted: "POSTED TO TMS", awaiting_approval: "READY, ONE CLICK TO POST", to_operator: "HELD FOR AN OPERATOR", logged: "SHADOW, LOGGED ONLY" };
+  const REASON_TXT = {
+    hazmat: "Hazardous material: an operator checks the safety data sheet and placards first.",
+    duplicate: "This reference is already an open order in the TMS.",
+    change_request: "It changes an order already booked.",
+    cancel_request: "It cancels an order already booked.",
+    not_an_order: "It is not an order.",
+    ref_not_in_email: "The reference read is not written anywhere in the email.",
+    weight_not_in_email: "The weight read is not written anywhere in the email.",
+    unknown_sender: "The sender is not a known shipper account.",
+    "date_check:order": "The dates run backwards or start before the email was sent.",
+    "date_check:format": "A date could not be read.",
+    "account_rule:equipment": "Wrong equipment for this shipper.",
+    "account_rule:appointment": "This shipper's deliveries need an appointment.",
+    "account_rule:temperature": "A reefer load with no temperature.",
+    "account_rule:liftgate": "Store deliveries need a liftgate.",
+    "account_rule:reference_format": "The reference is not in this shipper's format.",
+  };
+  const FIELD_TXT = {
+    customer_ref: "reference", pickup_facility: "pickup facility", pickup_date: "pickup date", delivery_facility: "delivery facility",
+    delivery_date: "delivery date", weight_lb: "weight", pallets: "pallet count", pickup_window: "pickup window",
+  };
+  const reasonText = (r) => {
+    if (REASON_TXT[r]) return REASON_TXT[r];
+    const [k, f] = r.split(":");
+    const name = FIELD_TXT[f] || f;
+    if (k === "missing_field") return `No ${name} in the email.`;
+    if (k === "uncertain") return `The agent was not sure of the ${name}.`;
+    if (k === "unknown_facility") return `The ${name} is not in the facility directory.`;
+    return r;
+  };
+  const EQ = { dry_van_53: "53 ft dry van", reefer_53: "53 ft reefer", flatbed_48: "48 ft flatbed" };
+  const fac = (c) => (c ? D.facilities[c] || c : null);
+  const num = (n) => (n == null ? null : Number(n).toLocaleString("en-US"));
+
+  let who = "agent", sel = D.cases[0].id, group = "all";
+  const stageFor = {};
+  for (const [k, a] of Object.entries(D.accounts)) stageFor[k] = a.supports || "shadow";
+
+  const status = (r, c) => (r.crit ? "crit" : r.failed.length ? "fail" : "pass");
+
+  function list() {
+    const ul = $("#mlist");
+    const shown = D.cases.filter((c) => group === "all" || c.group === group);
+    $("#icount").textContent = `${shown.length} emails`;
+    ul.innerHTML = shown
+      .map((c) => {
+        const r = c[who];
+        const st = status(r, c);
+        const from = D.accounts[c.expected.account]?.name || c.email.from;
+        return `<li><button type="button" role="option" aria-selected="${c.id === sel}" data-id="${c.id}"><i class="dot ${st}" aria-label="${st}"></i><span class="who">${esc(from)}</span><small>${esc(c.email.subject || "(no subject)")}</small></button></li>`;
+      })
+      .join("");
+    ul.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => pick(b.dataset.id)));
+  }
+
+  function mail(c) {
+    const e = c.email;
+    const att = (e.attachments || []).map((a) => `<div class="att"><b>${esc(a.name)}</b><pre>${esc(a.text)}</pre></div>`).join("");
+    $("#mail").innerHTML = `<div class="mh"><b>From</b> ${esc(e.from)}<br><b>Sent</b> ${esc(e.date.replace("T", " ").slice(0, 16))}</div><h2>${esc(e.subject || "(no subject)")}</h2><pre>${esc(e.body)}</pre>${att}`;
+  }
+
+  function action(route, stage) {
+    if (stage === "shadow") return "logged";
+    if (route !== "post") return "to_operator";
+    return stage === "approve" ? "awaiting_approval" : "posted";
+  }
+
+  function row(label, got, want, fmt = (x) => x) {
+    const g = got == null || got === "" || (Array.isArray(got) && !got.length) ? null : got;
+    const same = JSON.stringify(got ?? null) === JSON.stringify(want ?? null);
+    const shown = g == null ? "none" : esc(fmt(g));
+    if (want === undefined || same) return `<dt>${label}</dt><dd class="${g == null ? "na" : ""}">${shown}</dd>`;
+    const w = want == null || (Array.isArray(want) && !want.length) ? "none" : esc(fmt(want));
+    return `<dt>${label}</dt><dd class="bad">${shown}<small>should be ${w}</small></dd>`;
+  }
+
+  function doc(c) {
+    const r = c[who];
+    const o = r.out.order || {};
+    const acct = c.expected.account;
+    const stage = stageFor[acct];
+    const act = action(r.out.route, stage);
+    const want = c.expected.route === "post" ? c.expected.order : undefined;
+    const W = (k) => (want ? want[k] : undefined);
+    const stops = (f, d, extra) => [fac(f), d, extra].filter(Boolean).join(", ");
+    const isOrder = r.out.request_type !== "not_an_order" && r.out.request_type !== "cancel";
+    let body = "";
+    if (isOrder) {
+      body += `<dl class="tender">
+        ${row("Shipper", D.accounts[r.out.account]?.name, undefined)}
+        ${row("Reference", o.customer_ref, W("customer_ref"))}
+        ${row("Pickup", stops(o.pickup_facility, o.pickup_date, o.pickup_window), want ? stops(W("pickup_facility"), W("pickup_date"), W("pickup_window")) : undefined)}
+        ${row("Delivery", stops(o.delivery_facility, o.delivery_date, o.delivery_appt_required ? "appointment" : ""), want ? stops(W("delivery_facility"), W("delivery_date"), W("delivery_appt_required") ? "appointment" : "") : undefined)}
+        ${row("Equipment", o.equipment, W("equipment"), (x) => EQ[x] || x)}
+        ${row("Temperature", o.temp_f, W("temp_f"), (x) => `${x} F`)}
+        ${row("Weight", o.weight_lb, W("weight_lb"), (x) => `${num(x)} lb`)}
+        ${row("Pallets", o.pallets, W("pallets"))}
+        ${row("Hazmat", o.hazmat ? o.un_number || "yes" : null, want ? (W("hazmat") ? W("un_number") || "yes" : null) : undefined)}
+        ${row("Accessorials", o.accessorials, W("accessorials"), (x) => x.join(", "))}
+      </dl>`;
+    } else {
+      body += `<p class="point">${r.out.request_type === "cancel" ? `A cancellation of order ${esc(o.customer_ref || "")}. Nothing to enter.` : "Not an order. Nothing to enter."}</p>`;
+    }
+    if (r.out.reasons?.length) {
+      body += `<div class="why"><h3>Why it is held</h3><ul>${r.out.reasons.map((x) => `<li>${esc(reasonText(x))}</li>`).join("")}</ul>${r.out.note ? `<p><b>Note to the operator:</b> ${esc(r.out.note)}</p>` : ""}</div>`;
+    } else if (who === "parser") {
+      body += `<div class="why"><h3>The template parser posts everything</h3><p>It has no way to hold an email it does not understand.</p></div>`;
+    }
+    const expTxt = c.expected.route === "post" ? "post on its own with every field right" : "be held for an operator";
+    const res = r.crit ? "<b>Critical:</b> " : r.failed.length ? "<b>Missed:</b> " : "<b>Right.</b> ";
+    const detail = Object.values(r.why).filter(Boolean)[0] || "";
+    body += `<p class="grade">This email should ${expTxt}. ${res}${esc(detail)} Passed on ${r.passed_runs} of ${r.runs} run${r.runs > 1 ? "s" : ""}.</p>`;
+    if (who === "agent") body += `<div class="dmeta"><span>${esc(D.model)}</span><span>$${r.cost_usd.toFixed(4)}</span><span>${r.latency_s.toFixed(1)} s</span></div>`;
+    const segs = STAGES.map((s) => `<button type="button" role="radio" aria-checked="${s === stage}" data-s="${s}">${STAGE_TXT[s]}</button>`).join("");
+    const readers = [["agent", "Claude agent"], ["parser", "Template parser"]].map(([k, t]) => `<button type="button" role="radio" aria-checked="${k === who}" data-w="${k}">${t}</button>`).join("");
+    $("#doc").innerHTML = `<div class="dhead"><span class="status st-${act}">${ACTION_TXT[act]}</span><span class="n">${esc(c.id)}</span></div>
+      <div class="ctl"><div class="seg" role="radiogroup" aria-label="Reader" id="wseg">${readers}</div>
+      <label>${esc(D.accounts[acct].name)} stage</label><div class="seg" role="radiogroup" aria-label="Rollout stage" id="sseg">${segs}</div></div>
+      <div class="dbody">${body}</div>`;
+    $("#sseg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { stageFor[acct] = b.dataset.s; doc(c); }));
+    $("#wseg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { who = b.dataset.w; list(); doc(c); }));
+  }
+
+  function pick(id) {
+    sel = id;
+    const c = D.cases.find((x) => x.id === id);
+    list(); mail(c); doc(c);
+  }
+
+  function compare() {
+    const rows = [["agent", "Claude agent", `${D.model}, guardrails in code`], ["parser", "Template parser", "Labels and fixed defaults, no model"]];
+    $("#vrows").innerHTML = rows
+      .map(([k, name, sub]) => {
+        const cells = D.cases.map((c) => `<a class="cell ${status(c[k])}" href="#tool" data-id="${c.id}" aria-label="${name}, email ${c.id}: ${status(c[k])}"></a>`).join("");
+        const passed = D.cases.filter((c) => c[k].passed_runs === c[k].runs).length;
+        const crit = D.cases.filter((c) => c[k].crit).length;
+        const dec = D[k].decision;
+        const badge = dec === "go" ? `<span class="gate go">GO</span>` : dec === "partial" ? `<span class="gate partial">PARTIAL</span>` : `<span class="gate nogo">NO-GO</span>`;
+        return `<div class="vrow"><div class="vwho"><b>${name}</b><span>${sub}</span></div><div class="strip">${cells}</div><div class="vscore"><b>${passed}</b><span>of 30 right on every run<br>${crit} critical</span></div>${badge}</div>`;
+      })
+      .join("");
+    document.querySelectorAll("#vrows .cell").forEach((a) => a.addEventListener("click", () => { who = a.closest(".vrow") === document.querySelectorAll("#vrows .vrow")[1] ? "parser" : "agent"; pick(a.dataset.id); }));
+  }
+
+  function ladder() {
+    const accts = Object.entries(D.accounts);
+    const W = 760, L = 230, rowH = 52, top = 34, colW = (W - L - 10) / 3;
+    let svg = `<svg viewBox="0 0 ${W} ${top + rowH * accts.length + 8}" role="img" aria-label="Rollout stage each account's test emails support">`;
+    STAGES.forEach((s, i) => { svg += `<text class="col" x="${L + colW * i + 8}" y="20">${STAGE_TXT[s].toUpperCase()}</text>`; });
+    accts.forEach(([code, a], j) => {
+      const y = top + rowH * j;
+      const reach = STAGES.indexOf(a.supports || "shadow");
+      svg += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--rule-soft)"/>`;
+      svg += `<text class="lab" x="0" y="${y + 22}">${esc(a.name)}</text><text class="sub" x="0" y="${y + 40}">${a.emails} test emails, ${a.critical} critical, ${a.misses} missed (3 runs)</text>`;
+      for (let i = 0; i < 3; i++) {
+        const on = i <= reach;
+        svg += `<rect x="${L + colW * i + 4}" y="${y + 12}" width="${colW - 8}" height="26" rx="8" fill="${on ? (i === reach && reach === 2 ? "var(--green)" : "var(--green-wash)") : "none"}" stroke="${on ? "none" : "var(--rule)"}"/>`;
+      }
+    });
+    svg += `</svg>`;
+    $("#ladder").innerHTML = svg;
+    const auto = accts.filter(([, a]) => a.supports === "auto").map(([, a]) => a.name);
+    $("#laddernote").textContent = `Counts are over 3 runs of each email. An account supports approve with no critical error on any run, and auto when every clean order also posted on its own and every held email was held for the right reason. ${auto.length} of ${accts.length} accounts support auto on this test set. In a pilot the same bar runs on the shipper's real email, during shadow.`;
+  }
+
+  function accounts() {
+    $("#accts").innerHTML = Object.values(D.accounts).map((a) => `<div class="acct"><h3>${esc(a.name)}</h3><ul>${a.rules.map((r) => `<li>${esc(r)}</li>`).join("")}</ul></div>`).join("");
+  }
+
+  document.querySelectorAll("#ifilter button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("#ifilter button").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+    group = b.dataset.g; list();
+  }));
+
+  $("#datanote").textContent = `All shippers, facilities, people and numbers are invented: 30 emails written for this test, 5 fictional shipper accounts and a 13-facility directory. The agent's results are a recorded live run of ${D.model} (${D.calls} calls, mean $${D.mean_cost_usd.toFixed(4)} and ${D.mean_latency_s.toFixed(1)} s per call), replayed through the current code; the judge that grades operator notes is also ${D.model}.`;
+  compare(); ladder(); accounts(); pick(sel);
+})();
+</script><!-- demo-chrome --><footer class="demo-foot"><span>A working build by <a href="https://pranavgudise.dev/">Pranav Gudise</a>. Synthetic or public data only.</span><a href="https://github.com/pg2342-hub/order-intake-agent">github.com/pg2342-hub/order-intake-agent</a></footer><!-- /demo-chrome -->
+</body></html>
