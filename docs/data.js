@@ -3,7 +3,7 @@ window.DATA = {
   "CCH": {
    "critical": 0,
    "emails": 4,
-   "misses": 1,
+   "misses": 0,
    "name": "Calder Chemical",
    "posted": 6,
    "rules": [
@@ -14,7 +14,7 @@ window.DATA = {
    "runs": 12,
    "should_post": 6,
    "stage": "shadow",
-   "supports": "approve"
+   "supports": "auto"
   },
   "HPF": {
    "critical": 0,
@@ -101,14 +101,14 @@ window.DATA = {
    },
    {
     "critical": 0,
-    "passed": 29,
+    "passed": 30,
     "run": 3,
     "total": 30
    }
   ],
-  "decision": "no-go",
+  "decision": "go",
   "reasons": [
-   "run 3: exceptions passed 7 of 8, needs 8 (no-go)"
+   "every rule held on all 3 run(s), no critical failures"
   ]
  },
  "calls": 114,
@@ -118,7 +118,7 @@ window.DATA = {
     "cost_usd": 0.0221,
     "crit": false,
     "failed": [],
-    "latency_s": 3.29,
+    "latency_s": 3.196,
     "out": {
      "account": "NGP",
      "action": "posted",
@@ -296,10 +296,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.022292,
+    "cost_usd": 0.022272,
     "crit": false,
     "failed": [],
-    "latency_s": 3.876,
+    "latency_s": 3.314,
     "out": {
      "account": "NGP",
      "action": "posted",
@@ -307,7 +307,7 @@ window.DATA = {
       "Reference is Load Tender number, not PO",
       "Equipment 53 ft dry van",
       "Delivery appointment required, appointment accessorial added",
-      "Appleton default window not needed (window given)"
+      "Default mill window not needed (window given)"
      ],
      "evidence": {
       "customer_ref": "Load Tender: LT-48830",
@@ -481,7 +481,7 @@ window.DATA = {
     "cost_usd": 0.02074,
     "crit": false,
     "failed": [],
-    "latency_s": 3.41,
+    "latency_s": 3.572,
     "out": {
      "account": "HPF",
      "action": "posted",
@@ -647,13 +647,13 @@ window.DATA = {
     "cost_usd": 0.02144,
     "crit": false,
     "failed": [],
-    "latency_s": 3.943,
+    "latency_s": 3.664,
     "out": {
      "account": "HPF",
      "action": "posted",
      "applied_rules": [
       "Reference is PO number",
-      "Equipment 53 ft reefer (temp given: 34F, frozen default not used)",
+      "Equipment 53 ft reefer; stated temp 34F used instead of frozen default",
       "Pallet count present (14)",
       "Metro Grocers DC delivery: appointment required and appointment accessorial added"
      ],
@@ -823,10 +823,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.025808,
+    "cost_usd": 0.024768,
     "crit": false,
     "failed": [],
-    "latency_s": 5.332,
+    "latency_s": 4.865,
     "out": {
      "account": "RBS",
      "action": "posted",
@@ -834,7 +834,7 @@ window.DATA = {
       "Reference is PO number",
       "Equipment 48 ft flatbed",
       "Lumber tarped: tarps accessorial added",
-      "Relative dates resolved against email date (Thu 12/10, Fri 12/11 confirmed)"
+      "Relative dates resolved against email date (Thu 12/10, Fri 12/11 consistent)"
      ],
      "evidence": {
       "customer_ref": "PO 7745",
@@ -1005,7 +1005,7 @@ window.DATA = {
     "cost_usd": 0.020524,
     "crit": false,
     "failed": [],
-    "latency_s": 3.464,
+    "latency_s": 3.353,
     "out": {
      "account": "RBS",
      "action": "posted",
@@ -1169,17 +1169,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021352,
+    "cost_usd": 0.021432,
     "crit": false,
     "failed": [],
-    "latency_s": 3.556,
+    "latency_s": 3.417,
     "out": {
      "account": "CCH",
      "action": "posted",
      "applied_rules": [
       "Reference is Shipment No. CS-####",
       "Equipment 53 ft dry van",
-      "Hazmat check: stated not regulated, no UN number or hazard class, hazmat false"
+      "Hazmat check: stated not regulated, no UN number or hazard class, so hazmat false"
      ],
      "evidence": {
       "customer_ref": "Shipment No. CS-2291",
@@ -1188,7 +1188,7 @@ window.DATA = {
      "note": "",
      "order": {
       "accessorials": [],
-      "commodity": "water-based latex binder in drums",
+      "commodity": "water-based latex binder, 20 drums",
       "customer_ref": "CS-2291",
       "delivery_appt_required": false,
       "delivery_date": "2026-12-10",
@@ -1209,7 +1209,7 @@ window.DATA = {
      "stage": "auto",
      "tms": {
       "accessorials": [],
-      "commodity": "water-based latex binder in drums",
+      "commodity": "water-based latex binder, 20 drums",
       "equipment": "dry_van_53",
       "pallets": 5,
       "reference": "CS-2291",
@@ -1338,7 +1338,7 @@ window.DATA = {
     "cost_usd": 0.02056,
     "crit": false,
     "failed": [],
-    "latency_s": 3.404,
+    "latency_s": 3.395,
     "out": {
      "account": "LHG",
      "action": "posted",
@@ -1513,17 +1513,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.020504,
+    "cost_usd": 0.020484,
     "crit": false,
     "failed": [],
-    "latency_s": 3.833,
+    "latency_s": 2.958,
     "out": {
      "account": "LHG",
      "action": "posted",
      "applied_rules": [
-      "Reference is Order # (five digits)",
+      "Reference is five-digit Order #",
       "Equipment 53 ft dry van",
-      "Store delivery: liftgate added"
+      "Store delivery adds liftgate"
      ],
      "evidence": {
       "customer_ref": "Order # 55141",
@@ -1694,7 +1694,7 @@ window.DATA = {
     "cost_usd": 0.022024,
     "crit": false,
     "failed": [],
-    "latency_s": 3.603,
+    "latency_s": 3.583,
     "out": {
      "account": "NGP",
      "action": "posted",
@@ -1872,18 +1872,18 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021444,
+    "cost_usd": 0.021324,
     "crit": false,
     "failed": [],
-    "latency_s": 3.691,
+    "latency_s": 3.454,
     "out": {
      "account": "HPF",
      "action": "posted",
      "applied_rules": [
-      "Reference is PO number",
-      "Equipment 53 ft reefer, temp -10 F as given",
+      "PO number as reference",
+      "53 ft reefer equipment, temp -10 F as given",
       "Pallet count present (20)",
-      "Metro Grocers DC delivery: appointment required and appointment accessorial added"
+      "Metro Grocers DC delivery: appointment required and accessorial added"
      ],
      "evidence": {
       "customer_ref": "30431",
@@ -2056,17 +2056,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021656,
+    "cost_usd": 0.021676,
     "crit": false,
     "failed": [],
-    "latency_s": 3.165,
+    "latency_s": 3.648,
     "out": {
      "account": "NGP",
      "action": "posted",
      "applied_rules": [
       "Reference is Load Tender number, not PO",
       "Equipment 53 ft dry van",
-      "Delivery appointment required + appointment accessorial"
+      "Delivery appointment required, appointment accessorial added"
      ],
      "evidence": {
       "customer_ref": "Load Tender:LT-48860",
@@ -2243,21 +2243,21 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.02464,
+    "cost_usd": 0.02386,
     "crit": false,
     "failed": [],
-    "latency_s": 4.633,
+    "latency_s": 4.724,
     "out": {
      "account": "LHG",
      "action": "posted",
      "applied_rules": [
       "Reference is five-digit Order #",
       "Equipment 53 ft dry van",
-      "Latest forwarded message wins: delivery 12/11",
-      "Store delivery requires liftgate"
+      "Latest forwarded message wins: delivery moved to 12/11",
+      "Store delivery: liftgate added"
      ],
      "evidence": {
-      "customer_ref": "Order # 55137, Kenosha DC to store 14 Schaumburg",
+      "customer_ref": "Order # 55137",
       "weight": "8,900 lbs"
      },
      "note": "",
@@ -2422,10 +2422,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.0235,
+    "cost_usd": 0.0234,
     "crit": false,
     "failed": [],
-    "latency_s": 4.843,
+    "latency_s": 4.701,
     "out": {
      "account": "RBS",
      "action": "posted",
@@ -2595,17 +2595,18 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.02074,
+    "cost_usd": 0.02112,
     "crit": false,
     "failed": [],
-    "latency_s": 3.509,
+    "latency_s": 3.689,
     "out": {
      "account": "HPF",
      "action": "posted",
      "applied_rules": [
       "Reference is PO number",
-      "Equipment 53 ft reefer; stated temp -5F used instead of -10F default",
-      "Pallet count present (16)"
+      "53 ft reefer equipment; stated temp -5F used instead of default -10F",
+      "Pallet count provided (16)",
+      "No Metro Grocers DC delivery, no appointment required"
      ],
      "evidence": {
       "customer_ref": "PO 30426",
@@ -2761,18 +2762,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021196,
+    "cost_usd": 0.020716,
     "crit": false,
     "failed": [],
-    "latency_s": 3.352,
+    "latency_s": 3.095,
     "out": {
      "account": "HPF",
      "action": "posted",
      "applied_rules": [
       "Reference is PO number",
-      "Equipment 53 ft reefer at -10 F",
-      "Pallet count present (20)",
-      "Metro Grocers appointment rule not applicable (delivery to HPF cold storage)"
+      "Equipment 53 ft reefer, temp -10 F as stated",
+      "Pallet count present (20)"
      ],
      "evidence": {
       "customer_ref": "PO 30428",
@@ -2781,7 +2781,7 @@ window.DATA = {
      "note": "",
      "order": {
       "accessorials": [],
-      "commodity": "frozen pizza",
+      "commodity": "Frozen pizza",
       "customer_ref": "30428",
       "delivery_appt_required": false,
       "delivery_date": "2026-12-10",
@@ -2802,7 +2802,7 @@ window.DATA = {
      "stage": "auto",
      "tms": {
       "accessorials": [],
-      "commodity": "frozen pizza",
+      "commodity": "Frozen pizza",
       "equipment": "reefer_53",
       "pallets": 20,
       "reference": "30428",
@@ -2934,17 +2934,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021436,
+    "cost_usd": 0.021576,
     "crit": false,
     "failed": [],
-    "latency_s": 3.479,
+    "latency_s": 3.409,
     "out": {
      "account": "CCH",
      "action": "posted",
      "applied_rules": [
       "Reference is Shipment No. CS-####",
       "Equipment 53 ft dry van",
-      "Hazmat check: none shown (not regulated)"
+      "Hazmat check: stated not regulated, no UN number or hazard class"
      ],
      "evidence": {
       "customer_ref": "Shipment No. CS-2304",
@@ -3103,7 +3103,7 @@ window.DATA = {
     "cost_usd": 0.021164,
     "crit": false,
     "failed": [],
-    "latency_s": 3.707,
+    "latency_s": 3.58,
     "out": {
      "account": "NGP",
      "action": "posted",
@@ -3283,17 +3283,16 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.020576,
+    "cost_usd": 0.020536,
     "crit": false,
     "failed": [],
-    "latency_s": 2.967,
+    "latency_s": 3.164,
     "out": {
      "account": "HPF",
      "action": "posted",
      "applied_rules": [
       "Reference is PO number",
-      "53 ft reefer equipment",
-      "No temp given: frozen at -10 F",
+      "53 ft reefer, frozen -10 F default (no temp given)",
       "Pallet count present (12)"
      ],
      "evidence": {
@@ -3457,18 +3456,18 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.020752,
+    "cost_usd": 0.020972,
     "crit": false,
     "failed": [],
-    "latency_s": 3.23,
+    "latency_s": 3.697,
     "out": {
      "account": "RBS",
      "action": "posted",
      "applied_rules": [
       "Reference is PO number",
       "Equipment 48 ft flatbed",
-      "Drywall tarped: tarps accessorial added",
-      "Dates resolved against email sent date"
+      "Drywall tarped: tarps accessorial",
+      "Dates resolved against email date"
      ],
      "evidence": {
       "customer_ref": "PO 7761",
@@ -3479,7 +3478,7 @@ window.DATA = {
       "accessorials": [
        "tarps"
       ],
-      "commodity": "Drywall",
+      "commodity": "Drywall (12 bundles x 60 sheets)",
       "customer_ref": "7761",
       "delivery_appt_required": false,
       "delivery_date": "2026-12-10",
@@ -3502,7 +3501,7 @@ window.DATA = {
       "accessorials": [
        "tarps"
       ],
-      "commodity": "Drywall",
+      "commodity": "Drywall (12 bundles x 60 sheets)",
       "equipment": "flatbed_48",
       "pallets": null,
       "reference": "7761",
@@ -3640,7 +3639,7 @@ window.DATA = {
     "cost_usd": 0.020448,
     "crit": false,
     "failed": [],
-    "latency_s": 3.382,
+    "latency_s": 3.627,
     "out": {
      "account": "LHG",
      "action": "posted",
@@ -3816,17 +3815,17 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.021352,
+    "cost_usd": 0.021372,
     "crit": false,
     "failed": [],
-    "latency_s": 3.635,
+    "latency_s": 3.565,
     "out": {
      "account": "NGP",
      "action": "posted",
      "applied_rules": [
       "Reference is Load Tender number",
       "Equipment 53 ft dry van",
-      "Delivery appointment required + appointment accessorial",
+      "Delivery appointment required, appointment accessorial added",
       "Default Appleton mill pickup window 06:00-14:00"
      ],
      "evidence": {
@@ -4000,26 +3999,26 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.029444,
+    "cost_usd": 0.0297,
     "crit": false,
     "failed": [],
-    "latency_s": 6.551,
+    "latency_s": 6.415,
     "out": {
      "account": "CCH",
      "action": "to_operator",
      "applied_rules": [
       "Reference is Shipment No. CS-####",
       "Equipment 53 ft dry van",
-      "Hazmat flagged true with UN1263; route to operator for SDS and placard check before booking"
+      "Hazmat: set true, copy UN1263, route to operator for SDS/placard check before booking"
      ],
      "evidence": {
       "customer_ref": "Shipment No. CS-2299",
       "weight": "14,200 lbs"
      },
-     "note": "Calder Chem (logistics@calderchem.example) is placing new order CS-2299: 40 pails of solvent paint, UN1263, Class 3, PG II, 14,200 lbs on 8 pallets, picking up at their Gary plant on 12/10 and delivering to Prairie Coatings in Rockford on 12/11, with an SDS attached. It is held because the load is hazardous material. Review the attached SDS against the stated UN1263 / Class 3 / PG II details, then confirm the assigned carrier and driver are hazmat-qualified and that placards and shipping papers are arranged before entering the order.",
+     "note": "Calder Chemical is asking for a new shipment, CS-2299: 40 pails of paint (UN1263, Class 3 flammable liquid, Packing Group II), 14,200 lbs on 8 pallets, picking up at the Gary plant on 12/10 and delivering to Prairie Coatings Rockford on 12/11, with an SDS attached. It is held because the load is hazardous material. Before entering it, confirm hazmat handling for this lane: assign a hazmat-qualified carrier and driver, make sure placarding and shipping papers match UN1263 Class 3 PG II, and file the attached SDS with the order.",
      "order": {
       "accessorials": [],
-      "commodity": "Paint (solvent), 40 pails",
+      "commodity": "Paint (40 pails, flammable liquid)",
       "customer_ref": "CS-2299",
       "delivery_appt_required": false,
       "delivery_date": "2026-12-11",
@@ -4139,26 +4138,26 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.028816,
+    "cost_usd": 0.029136,
     "crit": false,
     "failed": [],
-    "latency_s": 6.085,
+    "latency_s": 6.628,
     "out": {
      "account": "CCH",
      "action": "to_operator",
      "applied_rules": [
       "Reference is Shipment No. CS-####",
       "Equipment 53 ft dry van",
-      "Flammable material: hazmat true, route to operator for SDS/placard check; no UN number given"
+      "Flammable material: hazmat true, routed to operator for SDS/placard check (no UN number given)"
      ],
      "evidence": {
       "customer_ref": "Shipment No. CS-2307",
       "weight": "6,600 lbs"
      },
-     "note": "Calder Chem is placing new order CS-2307: 12 drums of cleaning solvent (6,600 lbs, 3 pallets) from the Gary plant to Prairie Coatings in Rockford, picking up 12/11 and delivering 12/14. It is held because the email describes the solvent as flammable, which makes it likely hazardous material, and the email gives no UN number or hazmat class. Contact logistics@calderchem.example for the UN number, hazard class, packing group and emergency contact, and confirm a hazmat-qualified carrier, before entering the order.",
+     "note": "Calder Chemical is requesting a new shipment, ref CS-2307, from their Gary plant to Prairie Coatings in Rockford, picking up 12/11 and delivering 12/14: 12 drums of cleaning solvent, 6,600 lbs on 3 pallets. It is held because the email describes the solvent as flammable, so this is likely hazardous material, but it gives no UN number or hazard class. Contact logistics@calderchem.example to get the UN number, hazard class, packing group, and shipping papers. Then make sure the equipment and driver are hazmat-qualified before entering the order.",
      "order": {
       "accessorials": [],
-      "commodity": "Cleaning solvent, 12 drums",
+      "commodity": "cleaning solvent (12 drums)",
       "customer_ref": "CS-2307",
       "delivery_appt_required": false,
       "delivery_date": "2026-12-14",
@@ -4187,7 +4186,7 @@ window.DATA = {
       "un_number"
      ]
     },
-    "passed_runs": 2,
+    "passed_runs": 3,
     "runs": 3,
     "why": {}
    },
@@ -4278,24 +4277,25 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.032712,
+    "cost_usd": 0.033464,
     "crit": false,
     "failed": [],
-    "latency_s": 9.551,
+    "latency_s": 8.417,
     "out": {
      "account": "NGP",
      "action": "to_operator",
      "applied_rules": [
       "Reference is Load Tender number, not PO",
       "Equipment 53 ft dry van",
-      "Delivery appointment required; appointment accessorial added",
-      "Appleton default window not needed (window given)"
+      "Delivery appointment required, appointment accessorial added",
+      "Appleton default window not needed (window given in tender)",
+      "Resend treated as the original tender; check TMS for duplicate before creating"
      ],
      "evidence": {
       "customer_ref": "Load Tender: LT-48810",
       "weight": "Weight: 40,950 lbs"
      },
-     "note": "Northgate Paper is resending load tender LT-48810 (PO 4500-1170): 22 pallets of coated paper rolls, 40,950 lbs, 53' dry van, picking up 12/08/2026 07:00-11:00 at the Appleton, WI mill and delivering 12/09/2026 to the Romeoville DC. It is held because an open order already exists under reference LT-48810, and the email says it is a resend in case the first did not come through. Compare it against the existing order; if the details match, do not enter a duplicate and just reply to dispatch@northgatepaper.example confirming the tender, and if anything differs, update the existing order instead.",
+     "note": "Northgate Paper Co. is resending load tender LT-48810 (PO 4500-1170): 22 pallets, 40,950 lbs of coated paper rolls on a 53' dry van from the Appleton, WI mill to the Romeoville DC, picking up 12/08/2026 07:00-11:00 and delivering 12/09/2026. It is held because an open order already exists under reference LT-48810, and the email says it is a resend in case the first did not come through. Compare it against the existing order. If the details match, do not enter a duplicate; just reply to dispatch@northgatepaper.example confirming receipt. If anything differs, update the existing order instead of creating a new one.",
      "order": {
       "accessorials": [
        "appointment"
@@ -4424,10 +4424,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.032044,
+    "cost_usd": 0.031844,
     "crit": false,
     "failed": [],
-    "latency_s": 7.965,
+    "latency_s": 7.221,
     "out": {
      "account": "RBS",
      "action": "to_operator",
@@ -4435,13 +4435,13 @@ window.DATA = {
       "Reference is PO number",
       "Equipment 48 ft flatbed",
       "Lumber tarped: tarps accessorial",
-      "Dates resolved against email sent date (Monday 12/14/2026 confirmed)"
+      "Relative dates resolved against email date (Monday 12/14 = 2026-12-14)"
      ],
      "evidence": {
-      "customer_ref": "PO 7731-A",
+      "customer_ref": "Change on PO 7731-A",
       "weight": "36,000 lbs lumber"
      },
-     "note": "Mike at Ridgeline Build (purchasing@ridgelinebuild.example) is changing existing PO 7731-A: delivery moves to Monday 12/14, pickup stays 12/10, same load of 36,000 lbs lumber. It is held because it modifies an order already in the system and the email names neither the pickup nor the delivery facility, so the lane could not be read with confidence. Pull up the existing PO 7731-A, confirm it is the 36,000 lb lumber load with a 12/10 pickup, take the pickup and delivery facilities from that order, and update only the delivery date to 12/14.",
+     "note": "Ridgeline Building Supply (Mike, purchasing@ridgelinebuild.example) is asking to change existing PO 7731-A: move delivery to Monday 12/14, with pickup staying 12/10 and the load unchanged at 36,000 lbs lumber. It is held because it modifies an order already in the system, and the email does not name the pickup or delivery facilities. Pull up the existing PO 7731-A to get its pickup and delivery locations, then update only the delivery date to 12/14 and confirm the new appointment with the receiver.",
      "order": {
       "accessorials": [
        "tarps"
@@ -4543,10 +4543,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.025372,
+    "cost_usd": 0.025452,
     "crit": false,
     "failed": [],
-    "latency_s": 5.034,
+    "latency_s": 4.855,
     "out": {
      "account": "LHG",
      "action": "to_operator",
@@ -4558,7 +4558,7 @@ window.DATA = {
       "customer_ref": "Please cancel Order # 55102",
       "weight": null
      },
-     "note": "Lakeshore Home (cs@lakeshorehome.example) is asking to cancel Order # 55102 because the store no longer needs it; the email gives no lane or date. It is held because it cancels an order that already exists, and cancellations are not processed automatically. Find Order # 55102 in the system, check whether it has already been dispatched or picked up, and if not, cancel it and confirm the cancellation back to the shipper.",
+     "note": "Lakeshore Home Goods (cs@lakeshorehome.example) is asking to cancel Order # 55102 because the store no longer needs it; the email gives no lane or date. It is held because it cancels an order that already exists, which can't be done automatically. Find Order # 55102 in the system, check whether it has already been dispatched or tendered to a carrier, and cancel it, notifying the carrier if one is assigned.",
      "order": {
       "accessorials": [],
       "commodity": null,
@@ -4659,24 +4659,24 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.027252,
+    "cost_usd": 0.027284,
     "crit": false,
     "failed": [],
-    "latency_s": 5.543,
+    "latency_s": 5.599,
     "out": {
      "account": "HPF",
      "action": "to_operator",
      "applied_rules": [
       "Reference is PO number",
-      "53 ft reefer equipment",
-      "Pallet count missing - not guessed, flagged uncertain",
-      "Metro Grocers appointment rule not applicable (delivery to HPF cold storage)"
+      "Equipment 53 ft reefer, temp -10F as given",
+      "Pallet count missing; not guessed, flagged uncertain",
+      "Metro Grocers appointment rule not applicable"
      ],
      "evidence": {
       "customer_ref": "PO 30440",
       "weight": "27,000 lbs"
      },
-     "note": "Harbor Point Foods is placing new order PO 30440: frozen chicken, 27,000 lbs at -10F, from their Green Bay plant to Milwaukee cold storage, picking up and delivering 12/11. It is held because the email never gives a pallet count, which is required to enter the order. Get the pallet count from Harbor Point Foods (orders@harborpointfoods.example), add it, and release the order.",
+     "note": "Harbor Point Foods sent new order PO 30440: 27,000 lbs of frozen chicken at -10F, from the Green Bay plant to Milwaukee cold storage, picking up and delivering on 12/11. It is held because the email does not give a pallet count, which is required to enter the order. Contact Harbor Point Foods (orders@harborpointfoods.example) for the number of pallets, then enter the order.",
      "order": {
       "accessorials": [],
       "commodity": "frozen chicken",
@@ -4798,25 +4798,24 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.028884,
+    "cost_usd": 0.028336,
     "crit": false,
     "failed": [],
-    "latency_s": 6.664,
+    "latency_s": 5.673,
     "out": {
      "account": "HPF",
      "action": "to_operator",
      "applied_rules": [
       "Reference is PO number",
-      "53 ft reefer; stated temp -20F used instead of the -10F default",
+      "53 ft reefer equipment; stated temp -20F used",
       "Pallet count present (18)",
-      "Metro Grocers DC delivery: appointment required and appointment accessorial added",
-      "Delivery DC ambiguous (Joliet or Indianapolis): left null for operator"
+      "Metro Grocers DC delivery: appointment required and appointment accessorial added"
      ],
      "evidence": {
       "customer_ref": "PO 30442",
       "weight": "24,600 lbs"
      },
-     "note": "Harbor Point Foods is placing new order PO 30442: 18 pallets of ice cream, 24,600 lbs at -20F, picking up at the Green Bay plant on 12/14 and delivering to the Metro Grocers DC on 12/15. It is held because the email names \"Metro Grocers DC\" without saying which location, so the delivery facility could not be matched with confidence. Identify the correct Metro Grocers DC (from the account's facility list or by asking orders@harborpointfoods.example), set it as the delivery facility, and enter the order.",
+     "note": "Harbor Point Foods sent new order PO 30442: 18 pallets of ice cream, 24,600 lbs at -20F, picking up at the Green Bay plant on 12/14 and delivering to \"the Metro Grocers DC\" on 12/15. It is held because the email names the consignee only as \"the Metro Grocers DC\" and the reader could not match that to a specific delivery facility. Determine which Metro Grocers DC location this goes to, from the account's history or by asking orders@harborpointfoods.example, then set the delivery facility and enter the order.",
      "order": {
       "accessorials": [
        "appointment"
@@ -4915,10 +4914,10 @@ window.DATA = {
   },
   {
    "agent": {
-    "cost_usd": 0.024184,
+    "cost_usd": 0.024416,
     "crit": false,
     "failed": [],
-    "latency_s": 5.352,
+    "latency_s": 4.545,
     "out": {
      "account": "NGP",
      "action": "to_operator",
@@ -4929,7 +4928,7 @@ window.DATA = {
       "customer_ref": null,
       "weight": null
      },
-     "note": "This is not an order but a rate request from dispatch@northgatepaper.example asking for Q1 rates on two dry van lanes: Appleton mill to Atlanta and Appleton mill to Dallas, about 6 loads a week each. It is held because it does not ask to move a load, so nothing should be entered. Forward it to the sales or pricing team to quote and reply to the shipper.",
+     "note": "This is not an order but a rate request from Northgate Paper Co. (dispatch@northgatepaper.example) asking for Q1 rates on two dry van lanes: Appleton mill to Atlanta and Appleton mill to Dallas, about 6 loads a week each. It was held because the email does not ask to move a load, so nothing should be entered. Forward it to the sales or pricing team to quote the rates.",
      "order": {
       "accessorials": [],
       "commodity": null,
@@ -5039,9 +5038,9 @@ window.DATA = {
   "RBS-YARD": "Ridgeline Building Supply yard (Elgin, IL)"
  },
  "judge_calls": 24,
- "judge_cost_usd": 0.102048,
- "mean_cost_usd": 0.018535929824561405,
- "mean_latency_s": 3.619877192982456,
+ "judge_cost_usd": 0.10516,
+ "mean_cost_usd": 0.018555684210526315,
+ "mean_latency_s": 3.4896929824561402,
  "model": "claude-opus-5-5",
  "parser": {
   "by_run": [
